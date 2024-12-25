@@ -1,6 +1,5 @@
 # Import python packages
 import streamlit as st
-from snowflake.snowpark.context import get_active_session
 from snowflake.snowpark.functions import col, when_matched  # Import 'when_matched'
 
 # Title for the Streamlit app
@@ -11,7 +10,8 @@ name_on_order = st.text_input('Name on your smoothie')
 st.write("The name on your smoothie will be", name_on_order)
 
 # Establish session with Snowflake
-session = get_active_session()
+cnx=st.connection("snowflake")
+session = cnx.session()
 
 # Get the 'FRUIT_NAME' column from the 'fruit_options' table
 my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'))
