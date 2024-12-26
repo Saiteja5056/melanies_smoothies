@@ -16,14 +16,14 @@ cnx = st.connection("snowflake")
 session = cnx.session()
 
 # Query the fruit options from Snowflake table
-my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'))
+my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'), col('SEARCH_ON'))
 
 # Convert to Pandas DataFrame
 pd_df = my_dataframe.to_pandas()
 
 # Create a multiselect for users to choose up to 5 ingredients
 ingredients_list = st.multiselect(
-    'Choose up to 5 ingredients:', pd_df['FRUIT_NAME'].tolist(), max_selections=5
+    'Choose up to 5 ingredients:', my_dataframe, max_selections=5
 )
 
 # Initialize an empty string for ingredients
@@ -34,13 +34,10 @@ if ingredients_list:
     ingredients_string = ''
     for fruit_chosen in ingredients_list:
         ingredients_string += fruit_chosen + ' '
+        search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
         st.subheader(fruit_chosen + ' Nutrition Information')
-        
-        # Here, using the fruit name directly for the API request
-        smoothiefroot_response = requests.get(f"https://my.smoothiefroot.com/api/fruit/{fruit_chosen}")
-        
-        # Display the response data from the API
-        st.dataframe(smoothiefroot_response.json(), use_container_width=True)
+        smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/" + search_on)
+        sf_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
 
     # Create the SQL insert statement
     my_insert_stmt = f"""
@@ -55,6 +52,9 @@ else:
     # Handle the case where no ingredients are selected
     my_insert_stmt = None
     st.write("Please choose some ingredients.")
+
+# Removed invalid line "has context menu"
+# If you need to add anything specific here, do it properly.
 
 # Add button to submit the order
 if my_insert_stmt:  # Only show the button if the insert statement is valid
