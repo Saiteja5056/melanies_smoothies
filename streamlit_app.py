@@ -1,6 +1,9 @@
 # Import python packages
 import streamlit as st
 from snowflake.snowpark.functions import col, when_matched  # Import 'when_matched'
+ import requests
+smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
+st.text(smoothiefroot_response)   
 
 # Title for the Streamlit app
 st.title(":cup_with_straw: Customize your Smoothie  :cup_with_straw:")
@@ -39,9 +42,7 @@ if time_to_insert and ingredients_list:
     INSERT INTO smoothies.public.orders (ingredients, name_on_order) 
     VALUES ('{ingredients_string}', '{name_on_order}')
     """
- import requests
-smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
-st.text(smoothiefroot_response)   
+
     # Debugging: Display the insert statement
     st.write(my_insert_stmt)
     
